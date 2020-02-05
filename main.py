@@ -1,10 +1,9 @@
 import random
 import sys
-import time
 from collections import deque
 
-from PyQt5 import QtWidgets
 from PyQt5 import QtCore
+from PyQt5 import QtWidgets
 
 import MainBoard  # импорт нашего сгенерированного файла
 
@@ -13,11 +12,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def __init__(self):
         super(MainWindow, self).__init__()
-
+                                                    #TODO: check bad end of game
         self.ui = MainBoard.Ui_MainWindow()
+
         self.ui.setupUi(self)
         self.cards_dict = {}
-        self.card_value = {"B": 11, "D": 12, "K": 13, "T": 1}
+
         self.all_card = deque()  # Черга
         self.sum = 0
         self.card_memory = 0
@@ -27,9 +27,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.pushButton.setStyleSheet("font: 25pt Comic Sans MS")
         self.ui.pushButton.setText("►")
         self.ui.pushButton.clicked.connect(self.dobor)
+
+        self.ui.label.setText("Победа")
+        self.ui.label.hide()
+
         self.ui.pushButton_2.setStyleSheet("font: 25pt Comic Sans MS")
-
-
+        self.ui.pushButton_2.clicked.connect(lambda: self.check_card_sum(self.ui.pushButton_2))
+        self.ui.pushButton_2.isDeleted = False
         self.new_pasians()
 
     def construct_deck(self):
@@ -47,9 +51,10 @@ class MainWindow(QtWidgets.QMainWindow):
         b.setText(self.all_card.popleft())
 
         b.isDeleted = False
-        b.isReady = False
 
-        self.btn_grp.addButton(b)
+        b.clicked.connect(lambda: self.check_card_sum(b))
+        #self.btn_grp.addButton(b)
+
         #print(self.btn_grp.button(5))
         b.setStyleSheet("font: 25pt Comic Sans MS")
         return b
@@ -62,7 +67,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
             for col in range(1, row+1):
                 self.cards_dict[row, col] = self.new_card(pos_x, pos_y)
-                self.cards_dict[row, col].clicked.connect(lambda: self.check_card_sum((row, col)))
 
                 pos_x += 100
 
@@ -73,51 +77,102 @@ class MainWindow(QtWidgets.QMainWindow):
             self.cards_dict[7, col].setDisabled(False)
             self.cards_dict[7, col].isReady = True
 
-
-        #self.cards_dict[7, 3].click()
-        #print(self.cards_dict[7, 4].isChecked())
-        print(self.cards_dict)
+        self.ui.pushButton.setToolTip(str(len(self.all_card)))
         self.dobor()
 
     def dobor(self):
+
+        self.score()
+
+        if self.ui.pushButton_2.isChecked():
+            self.ui.pushButton_2.click()
+
         new_card = self.all_card.popleft()
         self.ui.pushButton_2.setText(new_card)
 
+        if self.ui.pushButton_2.isDeleted:
+
+            self.ui.pushButton_2.show()
+            self.ui.pushButton_2.isDeleted = False
+
         self.all_card.append(new_card)
 
-    def check_card_sum(self, row_col):
+    def card_value(self, val):
+        try:
+            return {"B": 11, "D": 12, "K": 13, "T": 1}[val]
+        except KeyError:
+            return int(val)
 
-        if row_col == self.card_memory:
+    def score(self):
+        self.ui.lcdNumber.display(0)
+
+        self.ui.lcdNumber.update()
+
+    def check_card_sum(self, btn):
+
+        if btn == self.card_memory:
+            print("==")
             self.sum = 0
             self.card_memory = 0
 
         else:
-            self.sum += self.card_value[row_col]
+            self.sum += self.card_value(btn.text()[1:])
             if self.sum == 13:
-                self.cards_dict[row_col].isDeleted = True
-                self.cards_dict[row_col].deleteLater()
+                print("==13")
+                btn.isDeleted = True
+                self.score()
+                if btn == self.ui.pushButton_2:
+                    self.all_card.pop()
+                    self.ui.pushButton_2.setChecked(False)
+                    self.ui.pushButton_2.hide()
+
+                else:
+                    btn.deleteLater()
+                self.sum = 0
 
                 if self.card_memory:
-                    self.cards_dict[self.card_memory].deleteLater()
+                    self.card_memory.isDeleted = True
 
-            elif self.card_memory:
-                self.cards_dict[self.card_memory].click()
-                self.cards_dict[row_col].click()
+                    self.score()
+                    if self.card_memory == self.ui.pushButton_2:
+                        self.all_card.pop()
+                        self.ui.pushButton_2.setChecked(False)
+                        self.ui.pushButton_2.hide()
+
+                    else:
+                        self.card_memory.deleteLater()
+
+                    self.card_memory = 0
+
+            elif self.card_memory != 0:
+                print("elif")
+                self.card_memory.click()
+                btn.click()
                 self.sum = 0
                 self.card_memory = 0
             else:
-                self.card_memory = row_col
+                print("else")
+                self.card_memory = btn
 
-
+        self.check_pasians_card()
 
     def check_pasians_card(self):
+
+        if len(self.all_card) == 0:
+            self.ui.pushButton.setDisabled(True)
+
+        if self.cards_dict[1, 1].isDeleted:
+            self.ui.label.show()
+
+        self.ui.pushButton.setToolTip(str(len(self.all_card)))
 
         for row in range(1, 7):
 
             for col in range(1, row+1):
                 if self.cards_dict[row+1, col].isDeleted and self.cards_dict[row+1, col+1].isDeleted:
-                    self.cards_dict[row, col].setDisabled(False)
-                    self.cards_dict[row, col].isReady = True
+                    if not self.cards_dict[row, col].isDeleted:
+                        self.cards_dict[row, col].setDisabled(False)
+
 
 app = QtWidgets.QApplication([])
 application = MainWindow()
