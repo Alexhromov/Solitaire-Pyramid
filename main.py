@@ -22,14 +22,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.sum = 0
         self.card_memory = 0
 
-        self.btn_grp = QtWidgets.QButtonGroup()
-
         self.ui.pushButton.setStyleSheet("font: 25pt Comic Sans MS")
         self.ui.pushButton.setText("►")
         self.ui.pushButton.clicked.connect(self.dobor)
 
         self.ui.label.setText("Победа")
         self.ui.label.hide()
+        self.ui.label.setStyleSheet("font: 100pt Comic Sans MS")
 
         self.ui.pushButton_2.setStyleSheet("font: 25pt Comic Sans MS")
         self.ui.pushButton_2.clicked.connect(lambda: self.check_card_sum(self.ui.pushButton_2))
@@ -37,7 +36,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.new_pasians()
 
     def construct_deck(self):
-        self.all_card += [mast + value for mast in "♥♦♣♠" for value in ([str(i) for i in range(2, 11)] + ['B', "D",
+        self.all_card += [mast + value for mast in "♥♦♣♠" for value in ([str(i) for i in range(2, 11)] + ['J', "Q",
                                                                                                            "K", "T"])]
         random.shuffle(self.all_card)
 
@@ -50,13 +49,15 @@ class MainWindow(QtWidgets.QMainWindow):
         b.setObjectName("pushButton")
         b.setText(self.all_card.popleft())
 
+        b.setStyleSheet("font: 25pt Comic Sans MS")
+
+        if b.text()[0] in "♦♥":
+            b.setStyleSheet("font: 25pt Comic Sans MS; color: rgb(255, 1, 1)")
+
         b.isDeleted = False
 
         b.clicked.connect(lambda: self.check_card_sum(b))
-        #self.btn_grp.addButton(b)
 
-        #print(self.btn_grp.button(5))
-        b.setStyleSheet("font: 25pt Comic Sans MS")
         return b
 
     def new_pasians(self):
@@ -90,6 +91,12 @@ class MainWindow(QtWidgets.QMainWindow):
         new_card = self.all_card.popleft()
         self.ui.pushButton_2.setText(new_card)
 
+        if self.ui.pushButton_2.text()[0] in "♦♥":
+            self.ui.pushButton_2.setStyleSheet("font: 25pt Comic Sans MS; color: rgb(255, 1, 1)")
+
+        else:
+            self.ui.pushButton_2.setStyleSheet("font: 25pt Comic Sans MS")
+
         if self.ui.pushButton_2.isDeleted:
 
             self.ui.pushButton_2.show()
@@ -99,26 +106,27 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def card_value(self, val):
         try:
-            return {"B": 11, "D": 12, "K": 13, "T": 1}[val]
+            return {"J": 11, "Q": 12, "K": 13, "T": 1}[val]
         except KeyError:
             return int(val)
 
     def score(self):
-        self.ui.lcdNumber.display(0)
+
+        self.ui.lcdNumber.display(self.ui.lcdNumber.value()+1)
 
         self.ui.lcdNumber.update()
 
     def check_card_sum(self, btn):
 
         if btn == self.card_memory:
-            print("==")
+
             self.sum = 0
             self.card_memory = 0
 
         else:
             self.sum += self.card_value(btn.text()[1:])
             if self.sum == 13:
-                print("==13")
+
                 btn.isDeleted = True
                 self.score()
                 if btn == self.ui.pushButton_2:
@@ -145,18 +153,20 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.card_memory = 0
 
             elif self.card_memory != 0:
-                print("elif")
+
                 self.card_memory.click()
                 btn.click()
                 self.sum = 0
                 self.card_memory = 0
             else:
-                print("else")
+
                 self.card_memory = btn
 
         self.check_pasians_card()
 
     def check_pasians_card(self):
+
+        self.score()
 
         if len(self.all_card) == 0:
             self.ui.pushButton.setDisabled(True)

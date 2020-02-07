@@ -27,7 +27,7 @@ class Ui_MainWindow(object):
         self.pushButton_2.setObjectName("pushButton_2")
 
         self.label = QtWidgets.QLabel(self.centralwidget)
-        self.label.setGeometry(QtCore.QRect(80, 80, 800, 400))
+        self.label.setGeometry(QtCore.QRect(360, 160, 800, 400))
         self.label.setObjectName("label")
 
         self.lcdNumber = QtWidgets.QLCDNumber(self.centralwidget)
@@ -69,8 +69,8 @@ class Ui_MainWindow(object):
         self.pushButton.setText(_translate("MainWindow", "N"))
         self.pushButton_2.setText(_translate("MainWindow", "N"))
         self.menuPoints.setTitle(_translate("MainWindow", "Points"))
-        self.actionB_11.setText(_translate("MainWindow", "B - 11"))
-        self.action_12.setText(_translate("MainWindow", "Д - 12"))
+        self.actionB_11.setText(_translate("MainWindow", "J - 11"))
+        self.action_12.setText(_translate("MainWindow", "Q - 12"))
         self.action_13.setText(_translate("MainWindow", "К -13"))
         self.action_1.setText(_translate("MainWindow", "Т - 1"))
         self.action6_7_6_7.setText(_translate("MainWindow", "2,3,..=2,3,.."))
