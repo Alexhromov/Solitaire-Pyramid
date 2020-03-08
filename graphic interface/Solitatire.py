@@ -2,28 +2,27 @@ import random
 import sys
 from collections import deque
 
+import MainBoard  # импорт нашего сгенерированного файла
 from PyQt5 import QtCore
 from PyQt5 import QtWidgets
 
-import MainBoard  # импорт нашего сгенерированного файла
+import test
 
 
 class Board(QtWidgets.QMainWindow):
 
     def __init__(self):
         super(Board, self).__init__()
-
         self.ui = MainBoard.Ui_MainWindow()
         self.ui.setupUi(self)
-
         self.deck = deque()
         self.cards_dict = {}
-
         self.sum = 0
         self.card_memory = 0
 
-        self.setup_board_element()
+        test.Decor(self.ui, self.cards_dict)
 
+        self.setup_board_element()
         self.new_pasians()
 
     def setup_board_element(self):
@@ -64,12 +63,14 @@ class Board(QtWidgets.QMainWindow):
             self.cards_dict[7, col].setDisabled(False)
             self.cards_dict[7, col].isReady = True
 
-        self.ui.pushButton.setToolTip(str(len(self.deck)))
+        self.deck.append("☻")
+
+        self.ui.pushButton.setToolTip(str(len(self.deck)-1))
         self.dobor()
 
     def card_value(self, val):
         try:
-            return {"J": 11, "Q": 12, "K": 13, "T": 1}[val]
+            return {"J": 11, "Q": 12, "K": 13, "T": 1, "": -1}[val]
         except KeyError:
             return int(val)
 
@@ -88,8 +89,6 @@ class Board(QtWidgets.QMainWindow):
 
     def dobor(self):
         """For using upper-left button, choice other card from deck """
-
-        self.score()
 
         if self.ui.pushButton_2.isChecked():
             self.ui.pushButton_2.click()
@@ -132,6 +131,7 @@ class Board(QtWidgets.QMainWindow):
 
                 btn.isDeleted = True
                 action_with_button(btn)
+                self.score()
 
                 self.sum = 0
 
@@ -139,13 +139,13 @@ class Board(QtWidgets.QMainWindow):
                     self.card_memory.isDeleted = True
 
                     action_with_button(self.card_memory)
-
                     self.card_memory = 0
 
             elif self.card_memory != 0:
 
-                self.card_memory.click()
-                btn.click()
+                self.card_memory.nextCheckState()
+                btn.nextCheckState()
+
                 self.sum = 0
                 self.card_memory = 0
             else:
@@ -157,15 +157,14 @@ class Board(QtWidgets.QMainWindow):
     def check_pasians_card(self):
         """When card deleted check if new cards can be usable"""
 
-        self.score()
-
         if len(self.deck) == 0:
             self.ui.pushButton.setDisabled(True)
 
         if self.cards_dict[1, 1].isDeleted:
+            self.ui.pushButton.setDisabled(True)
             self.ui.label.show()
 
-        self.ui.pushButton.setToolTip(str(len(self.deck)))
+        self.ui.pushButton.setToolTip(str(len(self.deck)-1))
 
         for row in range(1, 7):
 
@@ -221,6 +220,7 @@ class Deck:
         self.deck += [mast + value for mast in "♥♦♣♠" for value in ([str(i) for i in range(2, 11)] + ['J', "Q",
                                                                                                            "K", "T"])]
         random.shuffle(self.deck)
+
 
 app = QtWidgets.QApplication([])
 application = Board()
