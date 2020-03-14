@@ -1,15 +1,6 @@
+import os
 import random
 from collections import deque
-
-
-class Colors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
 
 
 class Board:
@@ -48,6 +39,8 @@ class Board:
     def dobor(self):
         """For using upper-left button, choice other card from deck """
 
+        if self.cards_dict[0, 1].isDeleted:
+            self.cards_dict[0, 1].isDeleted = False
         new_card = self.deck.popleft()
         self.cards_dict[0, 1].value_show = new_card
         self.cards_dict[0, 1].value = self.card_value(new_card[1:])
@@ -60,15 +53,11 @@ class Board:
         for i in index.split():
             l.append((int(i.split(",")[0]), int(i.split(",")[1])))
         index = l
-        print(index)
-        print(self.cards_dict[index[0]].value)
         if self.cards_dict[index[0]].value == 13:
             self.cards_dict[index[0]].isDeleted = True
-            print("1")
         if len(index) > 1:
 
             if self.cards_dict[index[0]].value + self.cards_dict[index[1]].value == 13:
-                print("2")
                 self.cards_dict[index[0]].isDeleted = True
                 self.cards_dict[index[1]].isDeleted = True
 
@@ -84,6 +73,8 @@ class Board:
             return int(val)
 
     def show(self):
+        os.system('cls' if os.name == 'nt' else 'clear')
+        print()
         # 7 - size window * 7 max last row, 2 - whitespace + size dobor + 2 whitespace * 3 Colors = 7 letters
         size_window = 7 * 7 + 7 * 2 + 7 * 2 + 4
 
@@ -98,12 +89,17 @@ class Board:
                 b = [self.cards_dict[row, col].show()[index] for col in range(1, row + 1)]
                 print(f'{"  ".join(b):^{size_window}}')
 
+    def winPrint(self):
+        with open("win.txt", "r") as w:
+            for line in w:
+                print(line)
+
     def check_pasians_card(self):
         """When card deleted check if new cards can be usable"""
 
         if self.cards_dict[1, 1].isDeleted:
-            print("U win this f*ck game. GJ")
-            pass
+            self.winPrint()
+            return
 
         for row in range(1, 7):
 
@@ -123,14 +119,24 @@ class Board:
             if self.cards_dict[1, 1].isDeleted:
                 break
 
-            answer = str(input())
+            while True:
+                try:
+                    answer = str(input())
+                    for i in answer.split():
+                        if int(i.split(",")[0]) not in range(1, 8) and int(i.split(",")[1]) not in range(1, 8):
+                            raise ValueError
+
+                    break
+                except (ValueError, IndexError):
+                    print("Enter right index")
+                    continue
 
             if answer == "":
                 self.dobor()
                 self.show()
                 continue
 
-            print("Answer")
+
             self.gameplay(answer)
 
 
@@ -183,5 +189,6 @@ class Deck:
 
 
 if __name__ == "__main__":
+
     application = Board()
 
