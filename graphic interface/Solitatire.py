@@ -1,12 +1,11 @@
-import random
+﻿import random
 import sys
 from collections import deque
 
-import MainBoard  # импорт нашего сгенерированного файла
 from PyQt5 import QtCore
 from PyQt5 import QtWidgets
 
-import test
+import MainBoard
 
 
 class Board(QtWidgets.QMainWindow):
@@ -19,8 +18,6 @@ class Board(QtWidgets.QMainWindow):
         self.cards_dict = {}
         self.sum = 0
         self.card_memory = 0
-
-        test.Decor(self.ui, self.cards_dict)
 
         self.setup_board_element()
         self.new_pasians()

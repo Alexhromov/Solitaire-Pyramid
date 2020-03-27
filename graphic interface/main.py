@@ -12,7 +12,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def __init__(self):
         super(MainWindow, self).__init__()
-                                                    #TODO: check bad end of game
+                                                   
         self.ui = MainBoard.Ui_MainWindow()
 
         self.ui.setupUi(self)
